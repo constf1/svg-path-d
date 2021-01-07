@@ -1,9 +1,15 @@
 {
   "name": "svg-path-d",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "SVG path data (path[d] attribute content) manipulation library.",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -11,7 +17,7 @@
     "url": "git+https://github.com/constf1/svg-path-d.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "mico",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/constf1/svg-path-d/issues"
