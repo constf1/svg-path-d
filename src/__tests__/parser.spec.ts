@@ -42,3 +42,27 @@ test('Path Data Parser', () => {
 
   testNumberOfArguments(tokens);
 });
+
+test('Unparseable Path Data', () => {
+  const unparseable = getTokens('Unparseable Path Data');
+  expect(unparseable.length).toEqual(0);
+});
+
+test('Path Data. Moves only', () => {
+  const pathData = 'm200 100 100 100-100 100-100-100z';
+
+  const relativeTokens = getTokens(pathData);
+  
+  expect(relativeTokens.length).toBeGreaterThan(1);
+  expect(relativeTokens[0].name).toBe('M');
+  expect(relativeTokens[0].relative).toBeTruthy();
+  expect(relativeTokens[1].name).toBe('L');
+  expect(relativeTokens[1].relative).toBeTruthy();
+
+  const absoluteTokens = getTokens(pathData.toUpperCase());
+  expect(absoluteTokens.length).toBeGreaterThan(1);
+  expect(absoluteTokens[0].name).toBe('M');
+  expect(absoluteTokens[0].relative).toBeFalsy();
+  expect(absoluteTokens[1].name).toBe('L');
+  expect(absoluteTokens[1].relative).toBeFalsy();
+});
