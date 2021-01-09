@@ -5,7 +5,7 @@ import { getX, getY, PathNode } from './path-node';
 export type CurveNode = PathNode & (CurveTo | QCurveTo | SmoothCurveTo | SmoothQCurveTo);
 export type SmoothCurveNode = PathNode & (SmoothCurveTo | SmoothQCurveTo);
 
-function isReflectable(node: Readonly<SmoothCurveNode>, prev: Readonly<PathNode>): prev is Readonly<CurveNode>{
+function isReflectable(node: Readonly<SmoothCurveNode>, prev: Readonly<PathNode>): prev is Readonly<CurveNode> {
   return prev.name === node.name ||
     (isCurveTo(prev) && isSmoothCurveTo(node)) ||
     (isQCurveTo(prev) && isSmoothQCurveTo(node));

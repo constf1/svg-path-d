@@ -45,7 +45,7 @@ export function getCenterParams(node: Readonly<PathNode & EllipticalArc>): Ellip
   const dx = (x1 - x2) / 2;
   const dy = (y1 - y2) / 2;
 
-  const x1_ =  cosPhi * dx + sinPhi * dy;
+  const x1_ = cosPhi * dx + sinPhi * dy;
   const y1_ = -sinPhi * dx + cosPhi * dy;
 
   // Correction Step 3: Ensure radii are large enough
@@ -151,7 +151,7 @@ export function approximateEllipticalArc(node: Readonly<PathNode & EllipticalArc
   const ellipse = getCenterParams(node);
   if (ellipse.rx <= 0 || ellipse.ry <= 0 || !ellipse.deltaTheta) {
     // Treat this as a straight line and stop.
-    return [{ name: 'L' , x: node.x, y: node.y }];
+    return [{ name: 'L', x: node.x, y: node.y }];
   }
 
   // Determine the number of curves to use in the approximation.

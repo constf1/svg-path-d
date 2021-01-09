@@ -2,7 +2,7 @@ import { DrawTo, MoveTo } from './command';
 import { isClosePath, isHLineTo, isMoveTo, isVLineTo } from './command-assertion';
 import { DrawToken } from './parser';
 
-export type PathNode = DrawTo & { prev?: PathNode};
+export type PathNode = DrawTo & { prev?: PathNode };
 
 function getMoveTo(item?: Readonly<PathNode>): Readonly<PathNode & MoveTo> | undefined {
   for (let node = item; node; node = node.prev) {
@@ -60,8 +60,10 @@ export function createPathNode({ name, args, relative }: Readonly<DrawToken>, pr
     case 'C':
       return { name, x1: +args[0] + X0, y1: +args[1] + Y0, x2: +args[2] + X0, y2: +args[3] + Y0, x: +args[4] + X0, y: +args[5] + Y0, prev };
     case 'A':
-      return { name, rx: +args[0], ry: +args[1], angle: +args[2], largeArcFlag: +args[3] === 1, sweepFlag: +args[4] === 1,
-        x: +args[5] + X0, y: +args[6] + Y0, prev };
+      return {
+        name, rx: +args[0], ry: +args[1], angle: +args[2], largeArcFlag: +args[3] === 1, sweepFlag: +args[4] === 1,
+        x: +args[5] + X0, y: +args[6] + Y0, prev
+      };
   }
 }
 

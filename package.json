@@ -10,6 +10,7 @@
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
+    "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
     "test": "jest --coverage"
   },
   "repository": {
@@ -25,7 +26,13 @@
   "homepage": "https://github.com/constf1/svg-path-d#readme",
   "devDependencies": {
     "@types/jest": "^26.0.20",
+    "@typescript-eslint/eslint-plugin": "^4.12.0",
+    "@typescript-eslint/parser": "^4.12.0",
+    "eslint": "^7.17.0",
+    "eslint-config-prettier": "^7.1.0",
+    "eslint-plugin-prettier": "^3.3.1",
     "jest": "^26.6.3",
+    "prettier": "^2.2.1",
     "ts-jest": "^26.4.4",
     "typescript": "^4.1.3"
   }

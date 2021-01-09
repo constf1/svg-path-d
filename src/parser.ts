@@ -8,7 +8,7 @@ const RE_UNSIGNED = /[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?/;
 /**
  * [Path Doc](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths)
  */
-const REXPS: {[key in DrawCommand]: Readonly<RegExp[]>} = {
+const REXPS: { [key in DrawCommand]: Readonly<RegExp[]> } = {
   // Move To:
   //  M x y
   //  m dx dy
