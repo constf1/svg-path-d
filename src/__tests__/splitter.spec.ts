@@ -35,7 +35,7 @@ test('Split an arc', () => {
 });
 
 test('An empty path could not be split', () => {
-  const path = fromString('MZ');
+  const path = fromString('M0 0Z');
   for (const node of path) {
     expect(canSplit(node)).toBeFalsy();
     expect(split(node, 111).length).toBe(1);
