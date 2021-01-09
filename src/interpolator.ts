@@ -1,10 +1,11 @@
+import { lastItem } from './utils/array';
+import { lerpObjects } from './utils/math1d';
 import { approximateEllipticalArc } from './arc-node';
 import { ClosePath, EllipticalArc } from './command';
 import { isClosePath, isEllipticalArc, isMoveTo } from './command-assertion';
 import { getX, getY, makePath, PathNode } from './path-node';
 import { canPromoteToCurve, promoteToCurve } from './promoter';
 import { getGroups, split } from './splitter';
-import { lastItem } from './utils/array';
 
 function stretch(pathGroup: PathNode[], size: number): PathNode[] {
   const first = pathGroup[0];
@@ -102,11 +103,11 @@ export function align(src: PathNode[], dst: PathNode[]): PathNode[][] {
 
   while (srcGroups.length < dstGroups.length) {
     const prev = lastItem(lastItem(srcGroups)!);
-    srcGroups.push([{ name: 'M', x: getX(prev), y: getY(prev), prev}]);
+    srcGroups.push([{ name: 'M', x: getX(prev), y: getY(prev), prev }]);
   }
   while (dstGroups.length < srcGroups.length) {
     const prev = lastItem(lastItem(dstGroups)!);
-    dstGroups.push([{ name: 'M', x: getX(prev), y: getY(prev), prev}]);
+    dstGroups.push([{ name: 'M', x: getX(prev), y: getY(prev), prev }]);
   }
 
   const itemsA: PathNode[] = [];
@@ -118,4 +119,21 @@ export function align(src: PathNode[], dst: PathNode[]): PathNode[][] {
   }
 
   return [makePath(itemsA), makePath(itemsB)];
+}
+
+export function makeInterpolator(src: PathNode[], dst: PathNode[]) {
+  const [a, b] = align(src, dst);
+  return (t: number) => {
+    if (t <= 0) {
+      return a;
+    } else if (t >= 1) {
+      return b;
+    } else {
+      const c: PathNode[] = [];
+      for (let i = 0; i < a.length; i++) {
+        c.push(lerpObjects(a[i], b[i], t));
+      }
+      return makePath(c);
+    }
+  }
 }
