@@ -129,3 +129,27 @@ export function split(item: Readonly<PathNode>, count: number): PathNode[] {
     return arr;
   }
 }
+
+// Split into logic groups
+export function getGroups(items: PathNode[]): PathNode[][]  {
+  const groups: PathNode[][] = [];
+  let next: PathNode[] | undefined = undefined;
+  for (const item of items) {
+    if (!next || isMoveTo(item)) {
+      if (next) {
+        groups.push(next);
+      }
+      next = [item];
+    } else {
+      next.push(item);
+    }
+    if (isClosePath(item)) {
+      groups.push(next);
+      next = undefined;
+    }
+  }
+  if (next) {
+    groups.push(next);
+  }
+  return groups;
+}

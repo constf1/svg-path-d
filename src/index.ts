@@ -5,4 +5,6 @@ export * from './path-node';
 export * from './arc-node';
 export * from './curve-node';
 export * from './builder';
+export * from './promoter';
 export * from './splitter';
+export * from './interpolator';
