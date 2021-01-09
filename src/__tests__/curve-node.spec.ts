@@ -1,7 +1,7 @@
+import { fromString } from '../builder';
 import { isBezierCurve, isCurveTo, isQCurveTo, isSmoothCurveTo, isSmoothQCurveTo } from '../command-assertion';
 import { getFirstControlX, getFirstControlY, getLastControlX, getLastControlY } from '../curve-node';
-import { getTokens } from '../parser';
-import { createPathNode, makePath, PathNode } from '../path-node';
+import { makePath, PathNode } from '../path-node';
 
 function testBezierCurves(path: ReadonlyArray<PathNode>) {
   for (const node of path) {
@@ -52,8 +52,7 @@ test('Cubic Bézier Nodes.', () => {
 
 test('Quadratic Bézier Nodes.', () => {
   const d='M10 50Q25 25 40 50t30 0t30 0h30t30 0t30 0t30 0';
-  const path = getTokens(d)
-    .reduce((arr, token, index) => [...arr, createPathNode(token, arr[index - 1])], [] as PathNode[]);
+  const path = fromString(d);
 
   const m = path[0];
   const q = path[1];

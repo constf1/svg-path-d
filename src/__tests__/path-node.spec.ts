@@ -1,16 +1,10 @@
+import { fromString } from '../builder';
 import { isClosePath, isMoveTo } from '../command-assertion';
-import { getTokens } from '../parser';
-import { createPathNode, getX, getY, PathNode } from '../path-node';
-
-function createPath(pathData: string) {
-  const tokens = getTokens(pathData);
-  let node: PathNode | undefined;
-  return tokens.map(token => node = createPathNode(token, node));
-}
+import { getX, getY } from '../path-node';
 
 test('Path Node Creation.', () => {
   const data = 'M573 170c53 17 58 173 58 333s3 283 41 301h-121q31-365-56-579t36-122a25 25 0 11-25 25v45l38 27z';
-  const path = createPath(data);
+  const path = fromString(data);
   
   expect(path.length).toBeGreaterThan(1);
   
