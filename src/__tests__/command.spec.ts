@@ -1,5 +1,5 @@
-import { HLineTo, LineTo, MoveTo, VLineTo } from '../command'
-import { isHLineTo, isLineTo, isMoveTo, isVLineTo } from '../command-assertion'
+import { HLineTo, LineTo, MoveTo, VLineTo } from '../command';
+import { isHLineTo, isLineTo, isMoveTo, isVLineTo } from '../command-assertion';
 
 function createMoveTo(x: number, y: number): MoveTo {
   return { name: 'M', x, y };

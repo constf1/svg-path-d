@@ -8,5 +8,5 @@ export function twoVectorsAngle(ux: number, uy: number, vx: number, vy: number):
   const angle1 = a1 - a2;
   const angle2 = angle1 + sign * Math.PI * 2;
 
-  return (Math.abs(angle2) < Math.abs(angle1)) ? angle2 : angle1;
+  return Math.abs(angle2) < Math.abs(angle1) ? angle2 : angle1;
 }

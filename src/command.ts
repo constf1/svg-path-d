@@ -74,5 +74,15 @@ export type EllipticalArc = EllipseShape & {
   y: number;
 };
 
-export type DrawTo = MoveTo | LineTo | HLineTo | VLineTo | ClosePath | CurveTo | SmoothCurveTo | QCurveTo | SmoothQCurveTo | EllipticalArc;
+export type DrawTo =
+  | MoveTo
+  | LineTo
+  | HLineTo
+  | VLineTo
+  | ClosePath
+  | CurveTo
+  | SmoothCurveTo
+  | QCurveTo
+  | SmoothQCurveTo
+  | EllipticalArc;
 export type DrawCommand = DrawTo['name'];

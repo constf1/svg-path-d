@@ -2,7 +2,7 @@ import { formatDecimal } from '../../utils/format';
 
 test('formatDecimal function', () => {
   const n1 = 0.123456789;
-  const n2 = 9.876543210;
+  const n2 = 9.87654321;
 
   expect(formatDecimal(n1)).toBe('0');
   expect(formatDecimal(n2)).toBe('10');

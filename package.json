@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
-    "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
+    "tslint": "eslint --fix src --ext .ts",
     "test": "jest --coverage"
   },
   "repository": {

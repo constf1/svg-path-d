@@ -18,7 +18,7 @@ test('Cubic Bézier Nodes.', () => {
   const path = makePath([
     { name: 'M', x: 10, y: 90 },
     { name: 'C', x1: 30, y1: 90, x2: 25, y2: 10, x: 50, y: 10 },
-    { name: 'S', x2: 70, y2: 90, x: 90, y: 90 }
+    { name: 'S', x2: 70, y2: 90, x: 90, y: 90 },
   ]);
 
   const m = path[0];
@@ -51,7 +51,7 @@ test('Cubic Bézier Nodes.', () => {
 });
 
 test('Quadratic Bézier Nodes.', () => {
-  const d='M10 50Q25 25 40 50t30 0t30 0h30t30 0t30 0t30 0';
+  const d = 'M10 50Q25 25 40 50t30 0t30 0h30t30 0t30 0t30 0';
   const path = fromString(d);
 
   const m = path[0];

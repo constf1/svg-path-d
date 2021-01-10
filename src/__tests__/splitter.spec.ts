@@ -12,14 +12,23 @@ test('Split a line', () => {
   expect(canSplit(L)).toBeTruthy();
   expect(S.length).toBe(N);
   for (let i = 0; i < N; i++) {
-    expect(getX(S[i])).toBeCloseTo(L.x * (i + 1)/ N, 6);
-    expect(getY(S[i])).toBeCloseTo(L.y * (i + 1)/ N, 6);
+    expect(getX(S[i])).toBeCloseTo((L.x * (i + 1)) / N, 6);
+    expect(getY(S[i])).toBeCloseTo((L.y * (i + 1)) / N, 6);
   }
 });
 
 test('Split an arc', () => {
   const N = 6;
-  const A: EllipticalArc = { name: 'A', rx: 250, ry: 250, angle: 0, largeArcFlag: true, sweepFlag: true, x: 250, y: 250 };
+  const A: EllipticalArc = {
+    name: 'A',
+    rx: 250,
+    ry: 250,
+    angle: 0,
+    largeArcFlag: true,
+    sweepFlag: true,
+    x: 250,
+    y: 250,
+  };
   const S = split(A, N);
 
   const par = getCenterParams(A);
@@ -27,8 +36,8 @@ test('Split an arc', () => {
   expect(canSplit(A)).toBeTruthy();
   expect(S.length).toBe(N);
   for (let i = 0; i < N; i++) {
-    const pt = getEllipsePoint(par, par.theta + par.deltaTheta * (i + 1)/ N);
-    
+    const pt = getEllipsePoint(par, par.theta + (par.deltaTheta * (i + 1)) / N);
+
     expect(getX(S[i])).toBeCloseTo(pt.x, 6);
     expect(getY(S[i])).toBeCloseTo(pt.y, 6);
   }

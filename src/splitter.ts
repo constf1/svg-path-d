@@ -1,5 +1,15 @@
 import { lerp } from './utils/math1d';
-import { isBezierCurve, isClosePath, isCurveTo, isEllipticalArc, isHLineTo, isLineTo, isMoveTo, isSmoothCurveTo, isVLineTo } from './command-assertion';
+import {
+  isBezierCurve,
+  isClosePath,
+  isCurveTo,
+  isEllipticalArc,
+  isHLineTo,
+  isLineTo,
+  isMoveTo,
+  isSmoothCurveTo,
+  isVLineTo,
+} from './command-assertion';
 import { getX, getY, PathNode } from './path-node';
 import { getFirstControlX, getFirstControlY } from './curve-node';
 import { getCenterParams, getEllipsePoint } from './arc-node';
@@ -70,23 +80,24 @@ export function bisect(item: Readonly<PathNode>, t = 1 / 2): PathNode[] {
       if (par.deltaTheta) {
         const deltaTheta1 = lerp(0, par.deltaTheta, t);
         const p1 = getEllipsePoint(par, par.theta + deltaTheta1);
-        const largeArcFlag1 = Math.abs(deltaTheta1) > Math.PI;
-        const largeArcFlag2 = Math.abs(par.deltaTheta - deltaTheta1) > Math.PI;
+        const f1 = Math.abs(deltaTheta1) > Math.PI;
+        const f2 = Math.abs(par.deltaTheta - deltaTheta1) > Math.PI;
 
         const { rx, ry } = par;
         const { angle, sweepFlag } = item;
 
-        const a1: PathNode = { name: 'A', rx, ry, angle, sweepFlag, largeArcFlag: largeArcFlag1, x: p1.x, y: p1.y, prev };
-        const a2: PathNode = { name: 'A', rx, ry, angle, sweepFlag, largeArcFlag: largeArcFlag2, x: item.x, y: item.y, prev: a1 };
+        const a1: PathNode = { name: 'A', rx, ry, angle, sweepFlag, largeArcFlag: f1, x: p1.x, y: p1.y, prev };
+        const a2: PathNode = { name: 'A', rx, ry, angle, sweepFlag, largeArcFlag: f2, x: item.x, y: item.y, prev: a1 };
         return [a1, a2];
       } else {
         // Treat this as a straight line from (x1, y1) to (x2, y2).
         const x = lerp(X0, item.x, t);
         const y = lerp(Y0, item.y, t);
         const { rx, ry, angle, sweepFlag } = item;
+        const largeArcFlag = false;
 
-        const a1: PathNode = { name: 'A', rx, ry, angle, sweepFlag, largeArcFlag: false, x, y, prev };
-        const a2: PathNode = { name: 'A', rx, ry, angle, sweepFlag, largeArcFlag: false, x: item.x, y: item.y, prev: a1 };
+        const a1: PathNode = { name: 'A', rx, ry, angle, sweepFlag, largeArcFlag, x, y, prev };
+        const a2: PathNode = { name: 'A', rx, ry, angle, sweepFlag, largeArcFlag, x: item.x, y: item.y, prev: a1 };
         return [a1, a2];
       }
     } else if (isLineTo(item)) {
@@ -131,7 +142,7 @@ export function split(item: Readonly<PathNode>, count: number): PathNode[] {
 }
 
 // Split into logic groups
-export function getGroups(items: PathNode[]): PathNode[][]  {
+export function getGroups(items: PathNode[]): PathNode[][] {
   const groups: PathNode[][] = [];
   let next: PathNode[] | undefined = undefined;
   for (const item of items) {

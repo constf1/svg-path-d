@@ -63,8 +63,8 @@ export function promoteToCurve(item: Readonly<PathNode>): PathNode & CurveTo {
 
       const x1 = x0 + (x - x0) / 4; // (x + 2 * x0) / 3
       const y1 = y0 + (y - y0) / 4; // (y + 2 * y0) / 3
-      const x2 = x0 + 3 * (x - x0) / 4; // (x0 + 2 * x) / 3
-      const y2 = y0 + 3 * (y - y0) / 4; // (y0 + 2 * y) / 3
+      const x2 = x0 + (3 * (x - x0)) / 4; // (x0 + 2 * x) / 3
+      const y2 = y0 + (3 * (y - y0)) / 4; // (y0 + 2 * y) / 3
       return { name: 'C', x1, y1, x2, y2, x, y, prev };
     }
   }

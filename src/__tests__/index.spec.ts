@@ -3,11 +3,11 @@ import * as Path from '..';
 test('Path Creation.', () => {
   const data = 'M100 100s-25 0-25 25c0 25 0 50 25 50s0 25 25 25h25q25 0 25-25t25-25l25-5t25-10a50 25-10 00-75-35z';
   const pathA = Path.fromString(data);
-  
-  const dataB = pathA.map(item => Path.asString(item, 3)).join('');
+
+  const dataB = pathA.map((item) => Path.asString(item, 3)).join('');
   const pathB = Path.fromString(dataB);
 
-  const dataC = pathA.map(item => Path.asRelativeString(item)).join(' ');
+  const dataC = pathA.map((item) => Path.asRelativeString(item)).join(' ');
   const pathC = Path.fromString(dataC);
 
   expect(pathA.length).toBe(pathB.length);

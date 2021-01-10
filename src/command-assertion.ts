@@ -1,4 +1,16 @@
-import { ClosePath, CurveTo, DrawTo, EllipticalArc, HLineTo, LineTo, MoveTo, QCurveTo, SmoothCurveTo, SmoothQCurveTo, VLineTo } from './command';
+import {
+  ClosePath,
+  CurveTo,
+  DrawTo,
+  EllipticalArc,
+  HLineTo,
+  LineTo,
+  MoveTo,
+  QCurveTo,
+  SmoothCurveTo,
+  SmoothQCurveTo,
+  VLineTo,
+} from './command';
 
 // Type Guards:
 export function isMoveTo(item: DrawTo): item is MoveTo {

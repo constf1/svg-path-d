@@ -4,7 +4,7 @@ import { isEllipticalArc, isMoveTo } from '../command-assertion';
 import { getX, getY } from '../path-node';
 
 test('Elliptical Arc Nodes', () => {
-  const d='M200 200A100 100-45 01 300 100';
+  const d = 'M200 200A100 100-45 01 300 100';
   const path = fromString(d);
   const m = path[0];
   const a = path[1];
@@ -34,7 +34,7 @@ test('Elliptical Arc Nodes', () => {
 });
 
 test('Elliptical Arc Node. Radii scale up', () => {
-  const d='M200 200A0.1 0.1-45 01 300 100';
+  const d = 'M200 200A0.1 0.1-45 01 300 100';
   const path = fromString(d);
   const m = path[0];
   const a = path[1];
