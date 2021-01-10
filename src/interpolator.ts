@@ -159,14 +159,14 @@ const ARGS_COUNT: { [key in DrawCommand]: number } = {
   A: 7, // Arc To: A rx ry x-axis-rotation large-arc-flag sweep-flag x y
 } as const;
 
-function toPathArray(commands: DrawCommand[], params: number[], formatter: (n: number) => string): string[] {
+function toPathArray(commands: DrawCommand[], params: number[], formatter?: (n: number) => string): string[] {
   const path: string[] = [];
 
   let i = 0;
   for (const c of commands) {
     let buf = c;
     for (const j = i + ARGS_COUNT[c]; i < j; i++) {
-      buf += ' ' + formatter(params[i]);
+      buf += ' ' + (formatter ? formatter(params[i]) : params[i].toString());
     }
     path.push(buf);
   }
@@ -197,6 +197,6 @@ export function makeInterpolator(
     } else if (t > 0) {
       params = srcParams.map((value, index) => lerp(value, dstParams[index], t));
     }
-    return toPathArray(commands, params, options?.formatter || toString);
+    return toPathArray(commands, params, options?.formatter);
   };
 }
