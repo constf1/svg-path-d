@@ -1,9 +1,19 @@
 import { lerp } from './utils/math1d';
 import { approximateEllipticalArc } from './arc-node';
-import { ClosePath, DrawCommand, EllipticalArc } from './command';
-import { isClosePath, isEllipticalArc, isMoveTo } from './command-assertion';
+import { DrawCommand } from './command';
+import {
+  isClosePath,
+  isEllipticalArc,
+  isHLineTo,
+  isLineTo,
+  isMoveTo,
+  isQCurveTo,
+  isSmoothCurveTo,
+  isSmoothQCurveTo,
+  isVLineTo,
+} from './command-assertion';
 import { getX, getY, makePath, PathNode } from './path-node';
-import { canPromoteToCurve, promoteToCurve } from './promoter';
+import { canPromoteToCurve, promoteToCurve, promoteToLine, promoteToQCurve } from './promoter';
 import { getGroups, split } from './splitter';
 import { getParams } from './builder';
 
@@ -48,7 +58,7 @@ function stretch(pathGroup: PathNode[], size: number): PathNode[] {
   return makePath(items);
 }
 
-function alignGroups(groupA: NormalizedNode[], groupB: NormalizedNode[]): NormalizedNode[][] {
+function alignGroups(groupA: PathNode[], groupB: PathNode[]): PathNode[][] {
   const count = Math.max(groupA.length, groupB.length);
 
   if (groupA.length < count) {
@@ -57,8 +67,8 @@ function alignGroups(groupA: NormalizedNode[], groupB: NormalizedNode[]): Normal
     groupB = stretch(groupB, count);
   }
 
-  const itemsA: NormalizedNode[] = [];
-  const itemsB: NormalizedNode[] = [];
+  const itemsA: PathNode[] = [];
+  const itemsB: PathNode[] = [];
 
   for (let i = 0; i < count; i++) {
     const a = groupA[i];
@@ -66,6 +76,12 @@ function alignGroups(groupA: NormalizedNode[], groupB: NormalizedNode[]): Normal
     if (a.name === b.name) {
       itemsA.push({ ...a });
       itemsB.push({ ...b });
+    } else if (isLineTo(a) && isQCurveTo(b)) {
+      itemsA.push(promoteToQCurve(a));
+      itemsB.push({ ...b });
+    } else if (isLineTo(b) && isQCurveTo(a)) {
+      itemsA.push({ ...a });
+      itemsB.push(promoteToQCurve(b));
     } else {
       itemsA.push(canPromoteToCurve(a) ? promoteToCurve(a) : { ...a });
       itemsB.push(canPromoteToCurve(b) ? promoteToCurve(b) : { ...b });
@@ -75,10 +91,10 @@ function alignGroups(groupA: NormalizedNode[], groupB: NormalizedNode[]): Normal
   return [makePath(itemsA), makePath(itemsB)];
 }
 
-type NormalizedNode = Exclude<PathNode, EllipticalArc & ClosePath>;
+// type SimpleNode = (MoveTo | LineTo | QCurveTo | CurveTo) & { prev: SimpleNode };
 
-function normalize(path: PathNode[]): NormalizedNode[] {
-  const items: NormalizedNode[] = [];
+function normalize(path: PathNode[]): PathNode[] {
+  const items: PathNode[] = [];
 
   // Let's start with a MoveTo node.
   if (path.length <= 0 || !isMoveTo(path[0])) {
@@ -86,6 +102,7 @@ function normalize(path: PathNode[]): NormalizedNode[] {
   }
 
   // Get rid of EllipticalArcs and ClosePaths.
+  // Promote H/V Lines and Smooth Bezier Curves.
   for (const node of path) {
     if (isEllipticalArc(node)) {
       items.push(...approximateEllipticalArc(node));
@@ -98,6 +115,12 @@ function normalize(path: PathNode[]): NormalizedNode[] {
       if (x0 !== x || y0 !== y) {
         items.push({ name: 'L', x, y, prev });
       }
+    } else if (isHLineTo(node) || isVLineTo(node)) {
+      items.push(promoteToLine(node));
+    } else if (isSmoothCurveTo(node)) {
+      items.push(promoteToCurve(node));
+    } else if (isSmoothQCurveTo(node)) {
+      items.push(promoteToQCurve(node));
     } else {
       items.push({ ...node });
     }
