@@ -23,3 +23,7 @@ export function formatDecimal(value: number, maximumFractionDigits?: number): st
   }
   return str;
 }
+
+export function formatDigit(value: number, fractionDigits: number): string {
+  return ' ' + (fractionDigits < 0 ? value.toString() : formatDecimal(value, fractionDigits));
+}

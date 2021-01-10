@@ -1,11 +1,35 @@
-import { formatDecimal } from './utils/format';
 import { DrawTo } from './command';
-import { hasControlPoint1, hasControlPoint2, isClosePath, isEllipticalArc, isHLineTo, isVLineTo } from './command-assertion';
+import {
+  hasControlPoint1,
+  hasControlPoint2,
+  isClosePath,
+  isEllipticalArc,
+  isHLineTo,
+  isVLineTo,
+} from './command-assertion';
 import { getTokens } from './parser';
 import { createPathNode, getX, getY, PathNode } from './path-node';
+import { formatDigit } from './utils/format';
 
-function formatDigit(value: number, fractionDigits: number) {
-  return ' ' + (fractionDigits < 0 ? value.toString() : formatDecimal(value, fractionDigits));
+export function getParams(item: Readonly<DrawTo>, buf: number[]): void {
+  if (!isClosePath(item)) {
+    if (hasControlPoint1(item)) {
+      buf.push(item.x1, item.y1);
+    }
+    if (hasControlPoint2(item)) {
+      buf.push(item.x2, item.y2);
+    }
+    if (isEllipticalArc(item)) {
+      buf.push(item.rx, item.ry, item.angle, item.largeArcFlag ? 1 : 0, item.sweepFlag ? 1 : 0);
+    }
+
+    if (!isVLineTo(item)) {
+      buf.push(item.x);
+    }
+    if (!isHLineTo(item)) {
+      buf.push(item.y);
+    }
+  }
 }
 
 export function formatParams(item: Readonly<DrawTo>, x0: number, y0: number, fractionDigits: number): string {
@@ -35,6 +59,7 @@ export function formatParams(item: Readonly<DrawTo>, x0: number, y0: number, fra
   }
   return buf;
 }
+
 // To string conversions:
 
 /**
@@ -53,5 +78,5 @@ export function asRelativeString(item: Readonly<PathNode>, fractionDigits = -1):
 export function fromString(pathData: string): PathNode[] {
   let prev: PathNode | undefined = undefined;
   const tokens = getTokens(pathData);
-  return tokens.map(token => prev = createPathNode(token, prev));
+  return tokens.map((token) => (prev = createPathNode(token, prev)));
 }
