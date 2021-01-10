@@ -1,11 +1,19 @@
-import { lastItem } from './utils/array';
-import { lerpObjects } from './utils/math1d';
+import { lerp } from './utils/math1d';
 import { approximateEllipticalArc } from './arc-node';
-import { ClosePath, EllipticalArc } from './command';
+import { ClosePath, DrawCommand, EllipticalArc } from './command';
 import { isClosePath, isEllipticalArc, isMoveTo } from './command-assertion';
 import { getX, getY, makePath, PathNode } from './path-node';
 import { canPromoteToCurve, promoteToCurve } from './promoter';
 import { getGroups, split } from './splitter';
+import { getParams } from './builder';
+
+export type AlignmentOptions = {
+  groupClosePoints?: { x: number; y: number }[];
+};
+
+export type InterpolatorOptions = AlignmentOptions & {
+  formatter?: (n: number) => string;
+};
 
 function stretch(pathGroup: PathNode[], size: number): PathNode[] {
   const first = pathGroup[0];
@@ -24,7 +32,7 @@ function stretch(pathGroup: PathNode[], size: number): PathNode[] {
     const n = (b - r) / a;
     for (let i = 1; i <= a; i++) {
       const node = pathGroup[i];
-      const x = (i <= r ? n + 1 : n);
+      const x = i <= r ? n + 1 : n;
       if (x > 1) {
         items.push(...split(node, x));
       } else {
@@ -40,7 +48,7 @@ function stretch(pathGroup: PathNode[], size: number): PathNode[] {
   return makePath(items);
 }
 
-function alignGroups(groupA: PathNode[], groupB: PathNode[]) {
+function alignGroups(groupA: NormalizedNode[], groupB: NormalizedNode[]): NormalizedNode[][] {
   const count = Math.max(groupA.length, groupB.length);
 
   if (groupA.length < count) {
@@ -49,8 +57,8 @@ function alignGroups(groupA: PathNode[], groupB: PathNode[]) {
     groupB = stretch(groupB, count);
   }
 
-  const itemsA: PathNode[] = [];
-  const itemsB: PathNode[] = [];
+  const itemsA: NormalizedNode[] = [];
+  const itemsB: NormalizedNode[] = [];
 
   for (let i = 0; i < count; i++) {
     const a = groupA[i];
@@ -97,22 +105,39 @@ function normalize(path: PathNode[]): NormalizedNode[] {
   return makePath(items);
 }
 
-export function align(src: PathNode[], dst: PathNode[]): PathNode[][] {
+function addEmptyGroups(groups: PathNode[][], count: number, stopPoints?: { x: number; y: number }[]): void {
+  for (let i = 0; i < count; i++) {
+    const lastGroup = groups[groups.length - 1];
+    const prev = lastGroup[lastGroup.length - 1];
+
+    let x;
+    let y;
+    if (stopPoints && stopPoints.length > i) {
+      x = stopPoints[i].x;
+      y = stopPoints[i].y;
+    } else {
+      x = getX(prev);
+      y = getY(prev);
+    }
+    groups.push([{ name: 'M', x, y, prev }]);
+  }
+}
+
+export function align(src: PathNode[], dst: PathNode[], options?: AlignmentOptions): PathNode[][] {
   const srcGroups = getGroups(normalize(src));
   const dstGroups = getGroups(normalize(dst));
 
-  while (srcGroups.length < dstGroups.length) {
-    const prev = lastItem(lastItem(srcGroups)!);
-    srcGroups.push([{ name: 'M', x: getX(prev), y: getY(prev), prev }]);
-  }
-  while (dstGroups.length < srcGroups.length) {
-    const prev = lastItem(lastItem(dstGroups)!);
-    dstGroups.push([{ name: 'M', x: getX(prev), y: getY(prev), prev }]);
+  const count = srcGroups.length - dstGroups.length;
+  if (count < 0) {
+    addEmptyGroups(srcGroups, -count, options?.groupClosePoints);
+  } else if (count > 0) {
+    addEmptyGroups(dstGroups, count, options?.groupClosePoints);
   }
 
+  const size = srcGroups.length;
   const itemsA: PathNode[] = [];
   const itemsB: PathNode[] = [];
-  for (let i = 0; i < srcGroups.length; i++) {
+  for (let i = 0; i < size; i++) {
     const [a, b] = alignGroups(srcGroups[i], dstGroups[i]);
     itemsA.push(...a);
     itemsB.push(...b);
@@ -121,19 +146,57 @@ export function align(src: PathNode[], dst: PathNode[]): PathNode[][] {
   return [makePath(itemsA), makePath(itemsB)];
 }
 
-export function makeInterpolator(src: PathNode[], dst: PathNode[]) {
-  const [a, b] = align(src, dst);
-  return (t: number) => {
-    if (t <= 0) {
-      return a;
-    } else if (t >= 1) {
-      return b;
-    } else {
-      const c: PathNode[] = [];
-      for (let i = 0; i < a.length; i++) {
-        c.push(lerpObjects(a[i], b[i], t));
-      }
-      return makePath(c);
+const ARGS_COUNT: { [key in DrawCommand]: number } = {
+  Z: 0, // Close Path: Z
+  H: 1, // Horizontal Line To: H x
+  V: 1, // Vertical Line To: V y
+  L: 2, // Line To: L x y
+  M: 2, // Move To: M x y
+  T: 2, // Shortcut Quadratic Curve To: T x y
+  Q: 4, // Quadratic Curve To: Q x1 y1, x y
+  S: 4, // Shortcut Curve To: S x2 y2, x y
+  C: 6, // Curve To: C x1 y1, x2 y2, x y
+  A: 7, // Arc To: A rx ry x-axis-rotation large-arc-flag sweep-flag x y
+} as const;
+
+function toPathArray(commands: DrawCommand[], params: number[], formatter: (n: number) => string): string[] {
+  const path: string[] = [];
+
+  let i = 0;
+  for (const c of commands) {
+    let buf = c;
+    for (const j = i + ARGS_COUNT[c]; i < j; i++) {
+      buf += ' ' + formatter(params[i]);
     }
+    path.push(buf);
   }
+  return path;
+}
+
+export function makeInterpolator(
+  src: PathNode[],
+  dst: PathNode[],
+  options?: InterpolatorOptions
+): (t: number) => string[] {
+  const commands: DrawCommand[] = [];
+  const srcParams: number[] = [];
+  const dstParams: number[] = [];
+
+  const [a, b] = align(src, dst, options);
+
+  for (let i = 0; i < a.length; i++) {
+    commands.push(a[i].name);
+    getParams(a[i], srcParams);
+    getParams(b[i], dstParams);
+  }
+
+  return (t: number): string[] => {
+    let params = srcParams;
+    if (t >= 1) {
+      params = dstParams;
+    } else if (t > 0) {
+      params = srcParams.map((value, index) => lerp(value, dstParams[index], t));
+    }
+    return toPathArray(commands, params, options?.formatter || toString);
+  };
 }

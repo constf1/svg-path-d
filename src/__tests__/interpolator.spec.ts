@@ -27,8 +27,8 @@ test('Align test', () => {
 test('Interpolator test', () => {
   const interp = makeInterpolator(fromString(A), fromString(B));
 
-  const a = interp(0)
-  const b = interp(1);
+  const a = fromString(interp(0).join(''));
+  const b = fromString(interp(1).join(' '));
 
   expect(a.length).toBe(b.length);
   for (let i = 0; i < a.length; i++) {
@@ -37,7 +37,7 @@ test('Interpolator test', () => {
 
   for (let k = 1; k < 100; k++) {
     const t = k / 100;
-    const c = interp(t);
+    const c = fromString(interp(t).join('\n'));
 
     expect(b.length).toBe(c.length);
     for (let i = 0; i < c.length; i++) {
