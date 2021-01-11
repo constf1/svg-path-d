@@ -8,3 +8,4 @@ export * from './builder';
 export * from './promoter';
 export * from './splitter';
 export * from './interpolator';
+export * from './reverse';
