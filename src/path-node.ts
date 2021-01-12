@@ -95,3 +95,15 @@ export function makePath(items: DrawTo[]): PathNode[] {
   }
   return items;
 }
+
+export function map(
+  items: PathNode[],
+  mapper: (value: PathNode, index: number, arr: PathNode[]) => PathNode
+): PathNode[] {
+  let prev: PathNode | undefined;
+  return items.map((value, index, arr) => {
+    const next = mapper(value, index, arr);
+    next.prev = prev;
+    return (prev = next);
+  });
+}
