@@ -1,6 +1,6 @@
 {
   "name": "svg-path-d",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "SVG path data (path[d] attribute content) manipulation library.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
