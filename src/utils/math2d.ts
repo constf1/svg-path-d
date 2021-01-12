@@ -1,3 +1,8 @@
+export type Point = {
+  x: number;
+  y: number;
+};
+
 // In general, the angle between two vectors (ux, uy) and (vx, vy) can be computed as
 // +- arccos(dot(u, v) / (u.length * v.length),
 // where the +- sign is the sign of (ux * vy − uy * vx).
