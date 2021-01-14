@@ -1,7 +1,14 @@
 import { fromString } from '../builder';
 import { isBezierCurve, isCurveTo, isQCurveTo, isSmoothCurveTo, isSmoothQCurveTo } from '../command-assertion';
-import { getFirstControlX, getFirstControlY, getLastControlX, getLastControlY } from '../curve-node';
-import { makePath, PathNode } from '../path-node';
+import {
+  getCurveBoundingRect,
+  getFirstControlX,
+  getFirstControlY,
+  getLastControlX,
+  getLastControlY,
+  getQCurveBoundingRect,
+} from '../curve-node';
+import { getX, getY, makePath, PathNode } from '../path-node';
 
 function testBezierCurves(path: ReadonlyArray<PathNode>) {
   for (const node of path) {
@@ -81,4 +88,73 @@ test('Quadratic Bézier Nodes.', () => {
   }
 
   testBezierCurves(path);
+});
+
+test('Quadratic Bézier Node Bounding Box', () => {
+  const path = fromString('m100 200q100-100 200 200-100-300-200-200');
+
+  const m = path[0];
+  const q1 = path[1];
+  const q2 = path[2];
+
+  expect(isQCurveTo(m)).toBeFalsy();
+  expect(isQCurveTo(q1)).toBeTruthy();
+  expect(isQCurveTo(q2)).toBeTruthy();
+
+  if (isQCurveTo(q1) && isQCurveTo(q2)) {
+    const r1 = getQCurveBoundingRect(q1);
+    const r2 = getQCurveBoundingRect(q2);
+
+    expect(r1.left).toBeCloseTo(getX(q1.prev), 6);
+    expect(r1.right).toBeCloseTo(q1.x, 6);
+
+    expect(r1.top).toBeGreaterThan(q1.y1);
+    expect(r1.top).toBeLessThan(getY(q1.prev));
+    expect(r1.top).toBeLessThan(q1.y);
+    expect(r1.bottom).toBeCloseTo(q1.y, 6);
+
+    expect(r2.left).toBeCloseTo(q2.x, 6);
+    expect(r2.right).toBeCloseTo(getX(q2.prev), 6);
+
+    expect(r2.top).toBeGreaterThan(q2.y1);
+    expect(r2.top).toBeLessThan(q2.y);
+    expect(r2.top).toBeLessThan(getY(q2.prev));
+    expect(r2.bottom).toBeCloseTo(getY(q2.prev), 6);
+
+    expect(r1.left).toBeCloseTo(r1.left, 6);
+    expect(r1.top).toBeCloseTo(r2.top, 6);
+    expect(r1.right).toBeCloseTo(r2.right, 6);
+    expect(r1.bottom).toBeCloseTo(r2.bottom, 6);
+  }
+});
+
+test('Cubic Bézier Node Bounding Box', () => {
+  const path = fromString('m100 200c225-175-90 100 0 75-90 25 225-250 0-75');
+
+  const m = path[0];
+  const c1 = path[1];
+  const c2 = path[2];
+
+  expect(isCurveTo(m)).toBeFalsy();
+  expect(isCurveTo(c1)).toBeTruthy();
+  expect(isCurveTo(c2)).toBeTruthy();
+
+  if (isCurveTo(c1) && isCurveTo(c2)) {
+    const r1 = getCurveBoundingRect(c1);
+    const r2 = getCurveBoundingRect(c2);
+
+    expect(r1.left).toBeLessThan(getX(c1.prev));
+    expect(r1.left).toBeLessThan(c1.x);
+    expect(r1.left).toBeLessThan(c1.x1);
+    expect(r1.left).toBeGreaterThan(c1.x2);
+    expect(r1.right).toBeLessThan(c1.x1);
+    expect(r1.right).toBeGreaterThan(c1.x2);
+    expect(r1.right).toBeGreaterThan(c1.x);
+    expect(r1.right).toBeGreaterThan(getX(c1.prev));
+
+    expect(r1.left).toBeCloseTo(r1.left, 6);
+    expect(r1.top).toBeCloseTo(r2.top, 6);
+    expect(r1.right).toBeCloseTo(r2.right, 6);
+    expect(r1.bottom).toBeCloseTo(r2.bottom, 6);
+  }
 });
