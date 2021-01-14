@@ -8,19 +8,41 @@ npm i svg-path-d
 ```
 ## Usage
 ```ts
-import * as SVGPathD from "svg-path-d";
+import * as SPD from "svg-path-d";
+```
+### Example #1. From heart to triangle.
+```ts
+const heart = "M10 30a20 20 0 01 40 0 20 20 0 01 40 0q0 30-40 60-40-30-40-60z";
 
-function toLine(item: SVGPathD.PathNode): SVGPathD.PathNode {
-  return (SVGPathD.isClosePath(item) || SVGPathD.isMoveTo(item)) 
+const pathHeart = SPD.fromString(heart);
+const pathTriangle = SPD.createReveresed(SPD.makePath(pathHeart.map(toLine)));
+
+const triangle = pathTriangle.map(item => SPD.asString(item)).join("");
+
+const box = SPD.getBoundingRect(pathHeart);
+
+const appDiv: HTMLElement = document.getElementById("app");
+appDiv.innerHTML = `
+  <h1>Heart</h1>
+  <div>
+    <svg viewBox="${toViewBox(
+      box.left - 1,
+      box.top - 1,
+      box.right - box.left + 2,
+      box.bottom - box.top + 2
+    )}">
+      <path fill="red" d="${heart + triangle}"/>
+    </svg>
+  </div>
+`;
+
+function toLine(item: SPD.PathNode): SPD.PathNode {
+  return SPD.isClosePath(item) || SPD.isMoveTo(item)
     ? { ...item }
-    : { name: "L", x: SVGPathD.getX(item), y: SVGPathD.getY(item) };
+    : { name: "L", x: SPD.getX(item), y: SPD.getY(item) };
 }
 
-const heart = "m10 30a20 20 0 01 40 0a20 20 0 01 40 0q0 30-40 60q-40-30-40-60z";
-
-const pathSrc = SVGPathD.fromString(heart);
-const pathDst = SVGPathD.makePath(pathSrc.map(toLine));
-
-const triangle = pathDst.map(item => SVGPathD.asRelativeString(item)).join("");
-
+function toViewBox(x: number, y: number, width: number, height: number) {
+  return `${x} ${y} ${width} ${height}`;
+}
 ```
