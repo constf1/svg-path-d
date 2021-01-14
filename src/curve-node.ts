@@ -1,3 +1,5 @@
+import { bezier2, bezier3, clamp } from './utils/math1d';
+import { addPoint, addX, addY, fromPoint, isPointOut, Rect } from './utils/math2d';
 import { CurveTo, QCurveTo, SmoothCurveTo, SmoothQCurveTo } from './command';
 import {
   hasControlPoint1,
@@ -86,4 +88,89 @@ export function getLastControlY(node: Readonly<CurveNode>): number {
   } else {
     return getReflectedY1(node);
   }
+}
+
+export function getQCurveBoundingRect(node: Readonly<PathNode & (QCurveTo | SmoothQCurveTo)>): Rect {
+  const x0 = getX(node.prev);
+  const y0 = getY(node.prev);
+
+  const x1 = getFirstControlX(node);
+  const y1 = getFirstControlY(node);
+
+  const x2 = node.x;
+  const y2 = node.y;
+
+  const rc = fromPoint(x0, y0);
+  addPoint(rc, x2, y2);
+
+  if (isPointOut(rc, x1, y1)) {
+    // p(t) = (1 - t)^2 * p0 + 2 * (1 - t) * t * p1 + t^2 * p2, where t is in the range of [0,1]
+    // When the first derivative is 0, the point is the location of a local minimum or maximum.
+    // p'(t) = 2 * (t - 1) * p0 + 2 * (1 - 2 * t) * p1 + 2 * t * p2
+    //       = t * (2 * p0 - 4 * p1 + 2 * p2) + 2 * (p1-p0)
+    //       = 0 =>
+    // t * (p0 - 2 * p1 + p2) = (p0 - p1)
+    // t = (p0 - p1) / (p0 - 2 * p1 + p2)
+    const tx = clamp((x0 - x1) / (x0 - 2 * x1 + x2) || 0, 0, 1);
+    const px = bezier2(x0, x1, x2, tx);
+
+    const ty = clamp((y0 - y1) / (y0 - 2 * y1 + y2) || 0, 0, 1);
+    const py = bezier2(y0, y1, y2, ty);
+
+    addPoint(rc, px, py);
+  }
+
+  return rc;
+}
+
+export function getCurveBoundingRect(node: Readonly<PathNode & (CurveTo | SmoothCurveTo)>): Rect {
+  const x0 = getX(node.prev);
+  const y0 = getY(node.prev);
+  const x1 = getFirstControlX(node);
+  const y1 = getFirstControlY(node);
+  const x2 = node.x2;
+  const y2 = node.y2;
+  const x3 = node.x;
+  const y3 = node.y;
+
+  const rc = fromPoint(x0, y0);
+  addPoint(rc, x3, y3);
+
+  const kx0 = -x0 + x1;
+  const kx1 = x0 - 2 * x1 + x2;
+  const kx2 = -x0 + 3 * x1 - 3 * x2 + x3;
+
+  let hx = kx1 * kx1 - kx0 * kx2;
+  if (hx > 0) {
+    hx = Math.sqrt(hx);
+    let t = -kx0 / (kx1 + hx);
+    if (t > 0 && t < 1) {
+      addX(rc, bezier3(x0, x1, x2, x3, t));
+    }
+
+    t = -kx0 / (kx1 - hx);
+    if (t > 0 && t < 1) {
+      addX(rc, bezier3(x0, x1, x2, x3, t));
+    }
+  }
+
+  const ky0 = -y0 + y1;
+  const ky1 = y0 - 2 * y1 + y2;
+  const ky2 = -y0 + 3 * y1 - 3 * y2 + y3;
+
+  let hy = ky1 * ky1 - ky0 * ky2;
+  if (hy > 0) {
+    hy = Math.sqrt(hy);
+    let t = -ky0 / (ky1 + hy);
+    if (t > 0 && t < 1) {
+      addY(rc, bezier3(y0, y1, y2, y3, t));
+    }
+
+    t = -ky0 / (ky1 - hy);
+    if (t > 0 && t < 1) {
+      addY(rc, bezier3(y0, y1, y2, y3, t));
+    }
+  }
+
+  return rc;
 }

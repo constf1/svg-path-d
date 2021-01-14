@@ -1,5 +1,5 @@
 // tslint:disable: variable-name
-import { twoVectorsAngle } from './utils/math2d';
+import { addPoint, fromPoint, Rect, twoVectorsAngle } from './utils/math2d';
 import { CurveTo, EllipticalArc } from './command';
 import { getX, getY, PathNode } from './path-node';
 
@@ -190,4 +190,56 @@ export function approximateEllipticalArc(node: Readonly<PathNode & EllipticalArc
   } else {
     return [ellipticalArcToCurve(node.x, node.y, ellipse, theta, theta + deltaTheta, node.prev)];
   }
+}
+
+export function getEllipticalArcBoundingRect(node: Readonly<PathNode & EllipticalArc>): Rect {
+  const rc = fromPoint(node.x, node.y);
+  addPoint(rc, getX(node.prev), getY(node.prev));
+
+  const cp = getCenterParams(node);
+  if (cp.rx === 0 || cp.ry === 0 || cp.deltaTheta === 0) {
+    // It's a straight line.
+    return rc;
+  }
+
+  const thetaMin = cp.theta + Math.min(cp.deltaTheta, 0);
+  const thetaMax = cp.theta + Math.max(cp.deltaTheta, 0);
+
+  // Compute extremes using parametric description of ellipse:
+  // x(theta) = cx + rx * cos(theta) * cos(phi) - ry * sin(theta) * sin(phi)
+  // y(theta) = cy + rx * cos(theta) * sin(phi) + ry * sin(theta) * cos(phi)
+  // To compute the bounding box of the whole ellipse we need to find for which value of theta the above mentioned
+  // functions reach the local extremes. It means where the first derivatives of x and y according to theta are zero.
+  // We will get this two equations:
+  // 0 = -rx * sin(theta) * cos(phi) - ry * cos(theta) * sin(phi)
+  // 0 = -rx * sin(theta) * sin(phi) - ry * cos(theta) * cos(phi)
+  // which give the solution for x:
+  // theta = -atan(ry * tan(phi) / rx) + PI * n
+  // and for y:
+  // theta = atan(ry / (tan(phi) * rx)) + PI * n
+  let thetaX = -Math.atan2(cp.ry * Math.tan(cp.phi), cp.rx);
+
+  // rolling back
+  for (; thetaX > thetaMin; thetaX -= Math.PI);
+  // testing
+  for (; thetaX < thetaMax; thetaX += Math.PI) {
+    if (thetaX > thetaMin) {
+      const point = getEllipsePoint(cp, thetaX);
+      addPoint(rc, point.x, point.y);
+    }
+  }
+
+  let thetaY = Math.atan2(cp.ry, Math.tan(cp.phi) * cp.rx);
+
+  // rolling back
+  for (; thetaY > thetaMin; thetaY -= Math.PI);
+  // testing
+  for (; thetaY < thetaMax; thetaY += Math.PI) {
+    if (thetaY > thetaMin) {
+      const point = getEllipsePoint(cp, thetaY);
+      addPoint(rc, point.x, point.y);
+    }
+  }
+
+  return rc;
 }

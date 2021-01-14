@@ -9,3 +9,4 @@ export * from './promoter';
 export * from './splitter';
 export * from './interpolator';
 export * from './reverse';
+export * from './bounding-rect';
