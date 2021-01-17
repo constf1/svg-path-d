@@ -9,7 +9,7 @@ import {
   isSmoothCurveTo,
   isVLineTo,
 } from './command-assertion';
-import { getX, getY, makePath, PathNode } from './path-node';
+import { getX, getY, PathNode, clonePath } from './path-node';
 import { Point } from './utils/math2d';
 
 export function transformedX(m: ReadonlyMatrix, x: number, y: number): number {
@@ -126,5 +126,5 @@ export function transformedNode(matrix: ReadonlyMatrix, node: Readonly<PathNode>
 }
 
 export function createTransformed(path: PathNode[], matrix: ReadonlyMatrix): PathNode[] {
-  return makePath(path.map((item) => transformedNode(matrix, item)));
+  return clonePath(path, (item) => transformedNode(matrix, item));
 }
