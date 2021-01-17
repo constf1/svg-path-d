@@ -28,17 +28,17 @@ export function getItemBoundingRect(item: Readonly<PathNode>): Rect {
   }
 }
 
-export function getBoundingRect(items: Readonly<PathNode>[]): Rect {
-  return items.reduce(
-    (rc, item) => {
-      addRect(rc, getItemBoundingRect(item));
-      return rc;
-    },
-    {
+export function getBoundingRect(items: Readonly<PathNode>[], rect?: Rect): Rect {
+  if (!rect) {
+    rect = {
       left: Number.POSITIVE_INFINITY,
       top: Number.POSITIVE_INFINITY,
       right: Number.NEGATIVE_INFINITY,
       bottom: Number.NEGATIVE_INFINITY,
-    }
-  );
+    };
+  }
+  for (const item of items) {
+    addRect(rect, getItemBoundingRect(item));
+  }
+  return rect;
 }
