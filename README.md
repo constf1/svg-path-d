@@ -2,14 +2,107 @@
 SVG path data ('d' attribute) manipulation library.
 ## The d attribute defines a path to be drawn.
 A path definition is a list of path commands where each command is composed of a command letter and numbers that represent the command parameters. [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d)
-## Installation
+# Installation
 ```
 npm i svg-path-d
 ```
-## Usage
+# Usage
+
+## Step 1: Import the library.
 ```ts
 import * as SPD from "svg-path-d";
 ```
+
+## Step 2: Create a PathNode array.
+The `PathNode[]` is used to represent and manipulate a sequence of path draw commands.
+It can be created from a string via the `fromString(pathData: string): PathNode[]` method.
+
+```ts
+const heart = "M10 30a20 20 0 01 40 0 20 20 0 01 40 0q0 30-40 60-40-30-40-60z";
+const path = SPD.fromString(heart);
+```
+
+It also can be programmatically generated on the fly.
+```ts
+function createHeart(cx: number, cy: number, r: number): SPD.PathNode[] {
+  return SPD.makePath([
+    { name: "M", x: cx, y: cy - r },
+    {
+      name: "A",
+      rx: r,
+      ry: r,
+      angle: 0,
+      largeArcFlag: false,
+      sweepFlag: true,
+      x: cx + 2 * r,
+      y: cy - r
+    },
+    {
+      name: "Q",
+      x1: cx + 2 * r,
+      y1: cy + r / 2,
+      x: cx,
+      y: cy + 2 * r
+    },
+    {
+      name: "Q",
+      x1: cx - 2 * r,
+      y1: cy + r / 2,
+      x: cx - 2 * r,
+      y: cy - r
+    },
+    {
+      name: "A",
+      rx: r,
+      ry: r,
+      angle: 0,
+      largeArcFlag: false,
+      sweepFlag: true,
+      x: cx,
+      y: cy - r
+    },
+    { name: "Z" }
+  ]);
+}
+```
+
+## Step 3: Path manipulation.
+Path manipulation (or path handling) is the process of changing, transforming, splitting or analyzing paths.
+
+```ts
+// TODO: Add path manipulation examples here.
+```
+
+## Step 4: Converting PathNode arrays back into strings.
+
+There are two functions which can convert to string individual path draw commands:
+ * `asString(item: Readonly<DrawTo>, fractionDigits = -1): string`;
+ * `asRelativeString(item: Readonly<PathNode>, fractionDigits = -1): string`;
+
+So we can convert a `PathNode[]` with a desired precision:
+```ts
+const PRECISION = 3;
+
+function pathToString(path: SPD.PathNode[]): string {
+  return path.map(item => SPD.asString(item, PRECISION)).join("");
+}
+
+function pathToRelativeString(path: SPD.PathNode[]): string {
+  return path.map(item => SPD.asRelativeString(item, PRECISION)).join("");
+}
+
+function pathToShortestString(path: SPD.PathNode[]): string {
+  return path
+    .map(item => {
+      const s1 = SPD.asString(item, PRECISION);
+      const s2 = SPD.asRelativeString(item, PRECISION);
+      return s1.length < s2.length ? s1 : s2;
+    })
+    .join("");
+}
+```
+
+## Examples
 
 ### Example #1. A heart with a triangle.
 
