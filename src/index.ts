@@ -10,3 +10,4 @@ export * from './splitter';
 export * from './interpolator';
 export * from './reverse';
 export * from './bounding-rect';
+export * as utils from './utils';
