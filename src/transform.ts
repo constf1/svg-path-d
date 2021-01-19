@@ -128,3 +128,11 @@ export function transformedNode(matrix: ReadonlyMatrix, node: Readonly<PathNode>
 export function createTransformed(path: PathNode[], matrix: ReadonlyMatrix): PathNode[] {
   return clonePath(path, (item) => transformedNode(matrix, item));
 }
+
+// export function createTranslated(path: PathNode[], deltaX: number, deltaY: number): PathNode[] {
+//   return clonePath(path, (item) => {
+//     const next = { ...item };
+//     applyTranslate(next, deltaX, deltaY);
+//     return next;
+//   });
+// }
