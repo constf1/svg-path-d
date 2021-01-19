@@ -39,16 +39,62 @@ export function createTranslate(x: number, y: number): Matrix {
   return { a: 1, b: 0, c: 0, d: 1, e: x, f: y };
 }
 
+/**
+ * Creates a scale matrix.
+ * @param scaleX The amount by which to scale along the x-axis.
+ * @param scaleY The amount by which to scale along the y-axis.
+ */
 export function createScale(scaleX: number, scaleY: number): Matrix {
   return { a: scaleX, b: 0, c: 0, d: scaleY, e: 0, f: 0 };
+}
+
+/**
+ * Creates a scale about the specified point matrix.
+ * @param scaleX The amount by which to scale along the x-axis.
+ * @param scaleY The amount by which to scale along the y-axis.
+ * @param centerX The x-coordinate of the scale operation's center point.
+ * @param centerY The y-coordinate of the scale operation's center point.
+ */
+export function createScaleAt(scaleX: number, scaleY: number, centerX: number, centerY: number): Matrix {
+  // Analog of:
+  // SVG.transform="translate(cx, cy) scale(sx, sy) translate(-cx, -cy)"
+  // or
+  // multiply(
+  //   createTranslate(centerX, centerY),
+  //   multiply(createScale(scaleX, scaleY), createTranslate(-centerX, -centerY))
+  // );
+  return { a: scaleX, b: 0, c: 0, d: scaleY, e: centerX * (1 - scaleX), f: centerY * (1 - scaleY) };
 }
 
 export function createSkew(skewX: number, skewY: number): Matrix {
   return { a: 1, b: Math.tan(skewY), c: Math.tan(skewX), d: 1, e: 0, f: 0 };
 }
 
+/**
+ * Creates a rotation matrix.
+ * @param angle The rotation angle, in radians.
+ */
 export function createRotate(angle: number): Matrix {
   return { a: Math.cos(angle), b: Math.sin(angle), c: -Math.sin(angle), d: Math.cos(angle), e: 0, f: 0 };
+}
+
+/**
+ * Creates a rotation matrix about the specified point.
+ * @param angle The angle, in radians, by which to rotate.
+ * @param centerX The x-coordinate of the point about which to rotate.
+ * @param centerY The y-coordinate of the point about which to rotate.
+ */
+export function createRotateAt(angle: number, centerX: number, centerY: number): Matrix {
+  // Analog of:
+  // SVG.transform="translate(cx, cy) rotate(deg) translate(-cx, -cy)"
+  // or
+  // multiply(
+  //   createTranslate(centerX, centerY),
+  //   multiply(createRotate(angle), createTranslate(-centerX, -centerY))
+  // );
+  const a = Math.cos(angle);
+  const b = Math.sin(angle);
+  return { a, b, c: -b, d: a, e: (1 - a) * centerX + b * centerY, f: (1 - a) * centerY - b * centerX };
 }
 
 export function multiply(A: ReadonlyMatrix, B: ReadonlyMatrix): Matrix {
