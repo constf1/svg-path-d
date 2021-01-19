@@ -101,7 +101,7 @@ export function appendReversed(items: PathNode[], index: number, acc: PathNode[]
   }
 }
 
-export function createReveresed(items: PathNode[]): PathNode[] {
+export function createReversed(items: PathNode[]): PathNode[] {
   const reveresed: PathNode[] = [];
   let i = items.length;
   if (i > 0) {
