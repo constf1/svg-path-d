@@ -66,6 +66,24 @@ function createHeart(cx: number, cy: number, r: number): SPD.PathNode[] {
 }
 ```
 
+This can also be done with `PathBuilder`.
+
+```ts
+function createHeart(
+  cx: number,
+  cy: number,
+  r: number
+): SPD.PathNode[] {
+  return new SPD.PathBuilder()
+    .M(cx, cy - r)
+    .a(r, r, 0, 0, 1, 2 * r, 0)
+    .q(0, (3 * r) / 2, -2 * r, 3 * r)
+    .q(-2 * r, (-3 * r) / 2, -2 * r, -3 * r)
+    .a(r, r, 0, 0, 1, 2 * r, 0)
+    .z().path;
+}
+```
+
 ## Step 3: Path manipulation.
 Path manipulation (or path handling) is the process of changing, transforming, splitting or analyzing paths.
 
