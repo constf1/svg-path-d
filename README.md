@@ -18,8 +18,8 @@ The `PathNode[]` is used to represent and manipulate a sequence of path draw com
 It can be created from a string via the `fromString(pathData: string): PathNode[]` method.
 
 ```ts
-const heart = "M10 30a20 20 0 01 40 0 20 20 0 01 40 0q0 30-40 60-40-30-40-60z";
-const path = SPD.fromString(heart);
+let heart = "M50 30a20 20 0 0140 0q0 30-40 60-40-30-40-60a20 20 0 0140 0z";
+let path = SPD.fromString(heart);
 ```
 
 It also can be programmatically generated on the fly.
@@ -87,8 +87,17 @@ function createHeart(
 ## Step 3: Path manipulation.
 Path manipulation (or path handling) is the process of changing, transforming, splitting or analyzing paths.
 
+### Simple In-Place Transformations.
+  * `applyTranslate(item: DrawTo, dx: number, dy: number): void`;
+  * `applyVerticalFlip(item: DrawTo): void`;
+  * `applyHorizontalFlip(item: DrawTo): void`;
+
+### Create Transformed `PathNode[]`.
+  * `createTransformed(path: PathNode[], matrix: ReadonlyMatrix): PathNode[]`;
+  * `createReversed(items: PathNode[]): PathNode[]`;
+
 ```ts
-// TODO: Add path manipulation examples here.
+// TODO: Add path node manipulation examples here. (splitter/promoter/bounding-rect)
 ```
 
 ## Step 4: Converting PathNode arrays back into strings.
