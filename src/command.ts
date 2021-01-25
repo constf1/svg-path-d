@@ -86,3 +86,35 @@ export type DrawTo =
   | SmoothQCurveTo
   | EllipticalArc;
 export type DrawCommand = DrawTo['name'];
+
+export function createDrawItem(name: DrawCommand, args: ReadonlyArray<number | string>): DrawTo {
+  switch (name) {
+    case 'H':
+      return { name, x: +args[0] };
+    case 'V':
+      return { name, y: +args[0] };
+    case 'M':
+    case 'L':
+    case 'T':
+      return { name, x: +args[0], y: +args[1] };
+    case 'Q':
+      return { name, x1: +args[0], y1: +args[1], x: +args[2], y: +args[3] };
+    case 'S':
+      return { name, x2: +args[0], y2: +args[1], x: +args[2], y: +args[3] };
+    case 'C':
+      return { name, x1: +args[0], y1: +args[1], x2: +args[2], y2: +args[3], x: +args[4], y: +args[5] };
+    case 'A':
+      return {
+        name,
+        rx: +args[0],
+        ry: +args[1],
+        angle: +args[2],
+        largeArcFlag: +args[3] === 1,
+        sweepFlag: +args[4] === 1,
+        x: +args[5],
+        y: +args[6],
+      };
+    default:
+      return { name };
+  }
+}
