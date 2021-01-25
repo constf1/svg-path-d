@@ -77,6 +77,5 @@ export function asRelativeString(item: Readonly<PathNode>, fractionDigits = -1):
 
 export function fromString(pathData: string): PathNode[] {
   let prev: PathNode | undefined = undefined;
-  const tokens = getTokens(pathData);
-  return tokens.map((token) => (prev = createPathNode(token, prev)));
+  return getTokens(pathData).map((token) => (prev = createPathNode(token.name, token.args, token.relative, prev)));
 }
